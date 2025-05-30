@@ -1,1 +1,25 @@
- 
+ # Python cache
+__pycache__/
+*.py[cod]
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Environment files and secrets
+.env
+*.key
+*.json
+tokenizer_config.json
+
+# Model weights, intermediate outputs
+*.pt
+*.bin
+*.pkl
+output/
+runs/
+logs/
+cache/
+
+# Dataset (if large or downloaded)
+data/
+
