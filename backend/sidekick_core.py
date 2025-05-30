@@ -54,14 +54,14 @@ Respond in this JSON format:
     from langchain_community.chat_models import ChatLiteLLM
 
     llm = ChatLiteLLM(
-        model="custom/mistral",  # ✅ 'custom/' prefix is needed
-        api_base="http://localhost:1234/v1",  # ✅ LM Studio API
-        api_key="not-needed",  # ✅ Dummy key
-        litellm_provider="custom",  # ✅ Use 'custom'
-        custom_llm_provider="custom",  # ✅ Must match the prefix
-        model_alias="mistral",  # Optional: name used in logs
-        temperature=0.2
+        model="mistral",  # or any alias used in LM Studio
+        api_base="http://localhost:1234/v1",  # LM Studio base URL
+        api_key="not-needed",  # LM Studio usually doesn't need it
+        custom_llm_provider="openai"  # <--- THIS FIXES THE CRASH
     )
+
+    import litellm
+    litellm._turn_on_debug()
 
     chain = LLMChain(llm=llm, prompt=prompt)
 
