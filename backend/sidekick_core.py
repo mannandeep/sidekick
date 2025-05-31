@@ -1,14 +1,16 @@
 import sys
 import os
+import json
+
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from context_memory import get_context
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
-from langchain.chat_models import ChatOpenAI
-from langchain.chains import LLMChain
 from langchain_community.chat_models import ChatLiteLLM
+from langchain.chains import LLMChain
+from action_executor import execute_action
 
 # Load vectorstore
 def load_vectorstore(index_path="faiss_index"):
@@ -16,6 +18,7 @@ def load_vectorstore(index_path="faiss_index"):
     vectorstore = FAISS.load_local(index_path, embeddings=embedding, allow_dangerous_deserialization=True)
     return vectorstore
 
+# Run LLM reasoning + execute action
 def run_decision_chain(notes, context, similar_issues):
     template = """
 You are Sidekick, an AI assistant for product managers.
@@ -49,15 +52,12 @@ Respond in this JSON format:
 """
 
     prompt = PromptTemplate.from_template(template)
-    #llm = ChatOpenAI(temperature=0.2)
-
-    from langchain_community.chat_models import ChatLiteLLM
 
     llm = ChatLiteLLM(
-        model="mistral",  # or any alias used in LM Studio
-        api_base="http://localhost:1234/v1",  # LM Studio base URL
-        api_key="not-needed",  # LM Studio usually doesn't need it
-        custom_llm_provider="openai"  # <--- THIS FIXES THE CRASH
+        model="mistral",
+        api_base="http://localhost:1234/v1",
+        api_key="not-needed",
+        custom_llm_provider="openai"
     )
 
     import litellm
@@ -73,11 +73,8 @@ Respond in this JSON format:
         "similar_issues": joined_issues
     })
 
-    import json
-
     print("\n🧠 Agent's Reasoning Output:\n", response)
 
-    # Try to parse the response into JSON
     try:
         decision = json.loads(response)
         print("\n✅ Parsed Decision:\n", json.dumps(decision, indent=2))
@@ -92,12 +89,13 @@ Respond in this JSON format:
             "assignee": context.get("default_assignee") or "Unassigned"
         }
 
-    return decision
+    print("\n⚙️ Executing the suggested action...")
+    result = execute_action(decision)
+    print("\n📬 Action result:", result)
+    return result
 
-
-# Core Sidekick function
+# Core function
 def sidekick_core(notes: str):
-    # Step 1: Get context
     context = get_context()
     project_key = context.get("active_project_key") or "❓ Not set"
     assignee = context.get("default_assignee") or "Unassigned"
@@ -107,7 +105,6 @@ def sidekick_core(notes: str):
     print(f"📂 Active Project: {project_key}")
     print(f"👤 Default Assignee: {assignee}")
 
-    # Step 2: Run RAG search on the notes
     vectorstore = load_vectorstore()
     similar_issues = vectorstore.similarity_search(notes, k=3)
 
@@ -115,11 +112,10 @@ def sidekick_core(notes: str):
     for i, doc in enumerate(similar_issues, 1):
         print(f"\nResult {i}:\n{doc.page_content}\n{'-'*40}")
 
-    # Step 3: (Next Step) → Build prompt for reasoning
-
     return run_decision_chain(notes, context, [doc.page_content for doc in similar_issues])
 
-
+# Run directly
 if __name__ == "__main__":
     test_notes = "We need to fix the login issue again, users are stuck on Safari."
-    sidekick_core(test_notes)
+    final_result = sidekick_core(test_notes)
+    print("\n🎯 Final Outcome:", final_result)
