@@ -1,33 +1,34 @@
-import json
 from jira_utils import create_ticket, update_ticket
-
+from prd_generator import generate_prd
 
 def execute_action(decision: dict):
     action = decision.get("action")
+    print(f"\n⚙️ Action to perform: {action}")
 
     if action == "create_ticket":
-        print("\n🚀 Creating a new Jira ticket...")
-        issue_key = create_ticket(
-            project_key=decision.get("project_key"),
+        return create_ticket(
             summary=decision.get("summary"),
             description=decision.get("reason"),
             assignee=decision.get("assignee")
         )
-        return {"status": "created", "issue_key": issue_key}
 
     elif action == "update_ticket":
-        print(f"\n🔄 Updating existing issue: {decision.get('target_issue_key')}")
-        updated_key = update_ticket(
+        return update_ticket(
             issue_key=decision.get("target_issue_key"),
             comment=decision.get("comment")
         )
-        return {"status": "updated", "issue_key": updated_key}
+
+    elif action == "generate_prd":
+        return generate_prd(summary=decision.get("summary"))
 
     elif action == "clarify":
-        print("\n❓ LLM was not confident enough to take an action.")
-        print("📣 It suggested clarification:\n", decision.get("reason"))
-        return {"status": "clarify", "message": decision.get("reason")}
+        return "🤔 Agent needs clarification from the user."
+
+    elif action == "gather_info":
+        print("\n🤔 Sidekick needs more information before proceeding:")
+        for i, q in enumerate(decision.get("questions", []), 1):
+            print(f"  {i}. {q}")
+        return {"status": "follow_up_needed", "questions": decision.get("questions", [])}
 
     else:
-        print("\n❌ Unknown action type. No action taken.")
-        return {"status": "error", "message": "Unrecognized action."}
+        return f"🚫 Unknown action type: {action}"

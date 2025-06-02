@@ -38,15 +38,18 @@ Here are similar past issues from memory:
 Think carefully:
 - If this looks like a new issue, suggest creating a ticket.
 - If it's similar to an existing issue, suggest updating or commenting on it.
+- If the user is requesting a structured document like a PRD, choose "generate_prd" as the action.
+- If you need more information to proceed, ask the user for it by returning `gather_info` and listing your questions.
 - If you're not sure, suggest asking the user to clarify.
 
 Respond in this JSON format:
 {{
-  "action": "create_ticket" | "update_ticket" | "clarify",
+  "action": "create_ticket" | "update_ticket" | "clarify" | "gather_info" | "generate_prd",
   "reason": "...",
   "summary": "...",
   "target_issue_key": "...",
   "comment": "...",
+  "questions": ["...","..."],
   "assignee": "{assignee}"
 }}
 """
@@ -60,11 +63,7 @@ Respond in this JSON format:
         custom_llm_provider="openai"
     )
 
-    import litellm
-    litellm._turn_on_debug()
-
     chain = LLMChain(llm=llm, prompt=prompt)
-
     joined_issues = "\n\n".join(similar_issues)
     response = chain.run({
         "notes": notes,
@@ -76,7 +75,12 @@ Respond in this JSON format:
     print("\n🧠 Agent's Reasoning Output:\n", response)
 
     try:
-        decision = json.loads(response)
+        try:
+            decision = json.loads(response)
+        except json.JSONDecodeError:
+            response = response.strip().replace("None", "null")
+            decision = json.loads(response)
+
         print("\n✅ Parsed Decision:\n", json.dumps(decision, indent=2))
     except json.JSONDecodeError:
         print("❌ Could not parse response as JSON.")
@@ -86,13 +90,16 @@ Respond in this JSON format:
             "summary": "",
             "target_issue_key": "",
             "comment": "",
+            "questions": [],
             "assignee": context.get("default_assignee") or "Unassigned"
         }
 
+    # Execute the action and return result
     print("\n⚙️ Executing the suggested action...")
     result = execute_action(decision)
     print("\n📬 Action result:", result)
     return result
+
 
 # Core function
 def sidekick_core(notes: str):
@@ -116,6 +123,28 @@ def sidekick_core(notes: str):
 
 # Run directly
 if __name__ == "__main__":
-    test_notes = "We need to fix the login issue again, users are stuck on Safari."
+    test_notes = """
+    We’re planning to build a new onboarding flow for first-time users in our web app. The goal is to help new users understand the product faster and get to their first meaningful action within 2 minutes.
+
+    Here’s what we know:
+    - Target users: Early-stage startup founders using our analytics dashboard
+    - Pain point: They sign up but don’t understand how to connect their data or what metrics to focus on
+    - Current drop-off: 68% of new users leave before completing setup
+    - Hypothesis: If we guide them through setting up their first workspace and help them see dummy data, they’ll understand the value faster
+    - Inspiration: Figma's collaborative onboarding + Notion’s quickstart templates
+
+    Can you create a complete PRD for this feature?
+
+    It should include:
+    - Background and problem
+    - Goals and success metrics
+    - User stories
+    - Milestones
+    - Team
+    - Open questions
+
+    Assume this is part of our core product team’s Q3 priorities.
+    """
+
     final_result = sidekick_core(test_notes)
     print("\n🎯 Final Outcome:", final_result)
