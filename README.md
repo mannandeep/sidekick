@@ -13,6 +13,7 @@ The backend is organized as a Python package under `backend/`. Key components in
 - `context/` – context persistence
 - `sidekick.py` – orchestrates RAG and invokes actions
 
+
 ### Setup
 
 Before running the assistant you must build the Jira memory snapshot and vector store:
