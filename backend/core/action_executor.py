@@ -1,5 +1,5 @@
-from jira_utils import create_ticket, update_ticket
-from prd_generator import generate_prd
+from ..jira.jira_utils import create_ticket, update_ticket
+from ..llm.prd_generator import generate_prd
 
 def execute_action(decision: dict):
     action = decision.get("action")
