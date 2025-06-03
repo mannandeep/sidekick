@@ -25,11 +25,48 @@ python -m backend.rag.build_jira_vectorstore
 These scripts create `backend/jira_memory.json` and the `backend/faiss_index/` directory that `python -m backend` requires.
 
 
-Run the assistant via:
+Run the assistant via CLI or start the HTTP API.
+
+### Environment
+
+Create a `.env` file with:
+
+```
+JIRA_URL=<https://your-domain.atlassian.net>
+JIRA_EMAIL=<your@email>
+JIRA_API_TOKEN=<token>
+JIRA_DOMAIN=<your-domain.atlassian.net>
+```
+
+### Build Memory and Vector Store
 
 ```bash
-python -m backend --notes "my product notes"
+python -m backend.utils.get_info_from_jira
+python -m backend.rag.build_jira_vectorstore
 ```
+
+### CLI Usage
+
+Process notes directly:
+
+```bash
+python -m backend run --notes "my product notes"
+```
+
+Set context fields:
+
+```bash
+python -m backend set-project AAP
+python -m backend set-assignee amit
+```
+
+### HTTP API
+
+```bash
+python -m backend serve
+```
+
+POST `/sidekick` with `{ "notes": "..." }` to get a response.
 
 ## Frontend
 
