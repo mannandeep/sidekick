@@ -1,8 +1,10 @@
 import os
 from dotenv import load_dotenv
 from jira import JIRA
+from .config import require_env_vars
 
 load_dotenv()
+require_env_vars(["JIRA_URL", "JIRA_EMAIL", "JIRA_API_TOKEN"])
 
 JIRA_URL = os.getenv("JIRA_URL")
 JIRA_EMAIL = os.getenv("JIRA_EMAIL")

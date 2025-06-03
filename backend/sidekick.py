@@ -1,8 +1,6 @@
 import json
 from pathlib import Path
 
-from pathlib import Path
-
 
 from .context.context_memory import get_context
 from langchain_community.vectorstores import FAISS
@@ -29,13 +27,9 @@ def load_vectorstore(index_path: str | None = None):
         )
 
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    vectorstore = FAISS.load_local(str(index_path), embeddings=embedding, allow_dangerous_deserialization=True)
-
-def load_vectorstore(index_path="faiss_index"):
-    index_path = Path(__file__).parent / "faiss_index"
-    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    vectorstore = FAISS.load_local(index_path, embeddings=embedding, allow_dangerous_deserialization=True)
-
+    vectorstore = FAISS.load_local(
+        str(index_path), embeddings=embedding, allow_dangerous_deserialization=True
+    )
     return vectorstore
 
 # Run LLM reasoning + execute action

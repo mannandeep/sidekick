@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 
 import os
-import json
 
 from dotenv import load_dotenv
 from langchain.schema import Document
@@ -20,8 +19,6 @@ def load_jira_issues(filename: str | None = None):
         filename = Path(__file__).parent.parent / "jira_memory.json"
     else:
         filename = Path(filename)
-
-def load_jira_issues(filename="jira_memory.json"):
 
     with open(filename, "r") as f:
         data = json.load(f)
@@ -75,14 +72,10 @@ def create_vectorstore(docs, index_path: str | None = None):
         index_path = Path(__file__).parent.parent / "faiss_index"
     else:
         index_path = Path(index_path)
+
     embedding = get_embedding_model()
     vectorstore = FAISS.from_documents(docs, embedding)
     vectorstore.save_local(str(index_path))
-
-def create_vectorstore(docs, index_path="faiss_index"):
-    embedding = get_embedding_model()
-    vectorstore = FAISS.from_documents(docs, embedding)
-    vectorstore.save_local(index_path)
 
     print(f"✅ Vectorstore saved to: {index_path}")
     return vectorstore
