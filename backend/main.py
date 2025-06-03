@@ -1,5 +1,5 @@
 import argparse
-from .core.sidekick_core import sidekick_core
+from .sidekick import sidekick_core
 
 
 def main():
