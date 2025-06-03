@@ -6,7 +6,6 @@ CONTEXT_FILE = Path(__file__).parent / "context_memory.json"
 
 import os
 
-CONTEXT_FILE = "context_memory.json"
 
 
 # Default structure
@@ -20,12 +19,12 @@ default_context = {
 
 # Load context from file or create new
 def get_context():
-
     if CONTEXT_FILE.exists():
-    if os.path.exists(CONTEXT_FILE):
-
-        with open(CONTEXT_FILE, "r") as f:
-            return json.load(f)
+        try:
+            with open(CONTEXT_FILE, "r") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return default_context.copy()
     else:
         return default_context.copy()
 
