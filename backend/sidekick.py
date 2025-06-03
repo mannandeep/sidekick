@@ -1,16 +1,12 @@
-import sys
-import os
 import json
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from context_memory import get_context
+from .context.context_memory import get_context
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_core.prompts import PromptTemplate
 from langchain_community.chat_models import ChatLiteLLM
 from langchain.chains import LLMChain
-from action_executor import execute_action
+from .actions import execute_action
 
 # Load vectorstore
 def load_vectorstore(index_path="faiss_index"):
