@@ -1,6 +1,7 @@
-import os
-import requests
 import json
+import os
+from pathlib import Path
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -63,7 +64,11 @@ def build_full_snapshot():
         snapshot["projects"].append(proj_data)
     return snapshot
 
-def save_snapshot(snapshot, filename="jira_memory.json"):
+def save_snapshot(snapshot, filename: str | None = None):
+    if filename is None:
+        filename = Path(__file__).parent.parent / "jira_memory.json"
+    else:
+        filename = Path(filename)
     with open(filename, "w") as f:
         json.dump(snapshot, f, indent=2)
     print(f"✅ Jira snapshot saved to {filename}")
