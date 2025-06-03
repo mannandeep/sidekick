@@ -1,5 +1,8 @@
 import json
 
+from pathlib import Path
+
+
 from .context.context_memory import get_context
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -9,9 +12,28 @@ from langchain.chains import LLMChain
 from .actions import execute_action
 
 # Load vectorstore
+
+def load_vectorstore(index_path: str | None = None):
+    """Load the FAISS vectorstore from disk."""
+    if index_path is None:
+        index_path = Path(__file__).parent / "faiss_index"
+    else:
+        index_path = Path(index_path)
+
+    index_file = index_path / "index.faiss"
+    if not index_file.exists():
+        raise FileNotFoundError(
+            f"Vector store not found at {index_file}. Run `python -m backend.utils.get_info_from_jira` "
+            f"and `python -m backend.rag.build_jira_vectorstore` first."
+        )
+
+    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = FAISS.load_local(str(index_path), embeddings=embedding, allow_dangerous_deserialization=True)
+
 def load_vectorstore(index_path="faiss_index"):
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = FAISS.load_local(index_path, embeddings=embedding, allow_dangerous_deserialization=True)
+
     return vectorstore
 
 # Run LLM reasoning + execute action
