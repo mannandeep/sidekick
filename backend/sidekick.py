@@ -1,5 +1,7 @@
 import json
+
 from pathlib import Path
+
 
 from .context.context_memory import get_context
 from langchain_community.vectorstores import FAISS
@@ -10,6 +12,7 @@ from langchain.chains import LLMChain
 from .actions import execute_action
 
 # Load vectorstore
+
 def load_vectorstore(index_path: str | None = None):
     """Load the FAISS vectorstore from disk."""
     if index_path is None:
@@ -26,6 +29,11 @@ def load_vectorstore(index_path: str | None = None):
 
     embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = FAISS.load_local(str(index_path), embeddings=embedding, allow_dangerous_deserialization=True)
+
+def load_vectorstore(index_path="faiss_index"):
+    embedding = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    vectorstore = FAISS.load_local(index_path, embeddings=embedding, allow_dangerous_deserialization=True)
+
     return vectorstore
 
 # Run LLM reasoning + execute action
