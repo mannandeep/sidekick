@@ -1,4 +1,4 @@
-from ..jira.jira_utils import create_ticket
+from ..utils.jira_utils import create_ticket
 from ..context.context_memory import get_context
 
 
