@@ -71,3 +71,7 @@ POST `/sidekick` with `{ "notes": "..." }` to get a response.
 ## Frontend
 
 A minimal web interface is provided under `frontend/`.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
