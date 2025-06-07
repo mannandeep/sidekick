@@ -13,7 +13,51 @@
   <div id="root" class="h-full"></div>
 
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useContext, createContext } = React;
+const API_BASE = 'http://localhost:5000';
+
+const AppContext = createContext();
+
+function AppProvider({ children }) {
+  const [project, setProjectState] = useState(localStorage.getItem('currentProject'));
+  const [projects, setProjects] = useState(JSON.parse(localStorage.getItem('projects') || '[]'));
+  const [jiraConfig, setJiraConfigState] = useState(JSON.parse(localStorage.getItem('jiraConfig') || '{}'));
+  const [configLoading, setConfigLoading] = useState(false);
+
+  const saveProjects = (list) => localStorage.setItem('projects', JSON.stringify(list));
+
+  const selectProject = async (name) => {
+    setProjectState(name);
+    localStorage.setItem('currentProject', name);
+    try { await axios.post(`${API_BASE}/set-project`, { project: name }); } catch (e) { console.error(e); }
+  };
+
+  const createProject = async (name) => {
+    const newProjects = [...projects, name];
+    setProjects(newProjects);
+    saveProjects(newProjects);
+    await selectProject(name);
+  };
+
+  const resetProject = () => {
+    setProjectState(null);
+    localStorage.removeItem('currentProject');
+  };
+
+  const saveConfig = async (conf) => {
+    setConfigLoading(true);
+    setJiraConfigState(conf);
+    localStorage.setItem('jiraConfig', JSON.stringify(conf));
+    try { await axios.post(`${API_BASE}/set-jira-config`, conf); } catch (e) { console.error(e); }
+    setConfigLoading(false);
+  };
+
+  return (
+    <AppContext.Provider value={{ project, projects, createProject, selectProject, resetProject, jiraConfig, saveConfig, configLoading }}>
+      {children}
+    </AppContext.Provider>
+  );
+}
 
 function WelcomeScreen({ onCreate, onSelect }) {
   return (
@@ -37,7 +81,7 @@ function Sidebar({ project, onChangeProject }) {
   );
 }
 
-function JiraSetupForm({ config, onSave }) {
+function JiraSetupForm({ config, onSave, loading }) {
   const [form, setForm] = useState(config);
   useEffect(() => setForm(config), [config]);
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -52,12 +96,14 @@ function JiraSetupForm({ config, onSave }) {
       <input className="border p-1 mb-2" placeholder="Email" name="email" value={form.email || ''} onChange={handleChange} />
       <input className="border p-1 mb-2" placeholder="Project key" name="projectKey" value={form.projectKey || ''} onChange={handleChange} />
       <input className="border p-1 mb-2" placeholder="Default assignee" name="assignee" value={form.assignee || ''} onChange={handleChange} />
-      <button className="bg-blue-500 text-white px-2 py-1 rounded mt-auto" onClick={handleSubmit}>Save Config</button>
+      <button className="bg-blue-500 text-white px-2 py-1 rounded mt-auto" onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Saving...' : 'Save Config'}
+      </button>
     </div>
   );
 }
 
-function ChatPanel({ history, onSend }) {
+function ChatPanel({ history, onSend, loading }) {
   const [input, setInput] = useState('');
   const send = () => {
     if (!input.trim()) return;
@@ -74,20 +120,20 @@ function ChatPanel({ history, onSend }) {
       </div>
       <div className="flex">
         <input className="flex-1 border p-2 rounded-l" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if(e.key === 'Enter'){e.preventDefault(); send(); } }} placeholder="Ask something..." />
-        <button className="bg-blue-500 text-white px-4 rounded-r" onClick={send}>Send</button>
+        <button className="bg-blue-500 text-white px-4 rounded-r" onClick={send} disabled={loading}>{loading ? '...': 'Send'}</button>
       </div>
     </div>
   );
 }
 
-function ProjectDashboard({ project, jiraConfig, onSaveConfig, chatHistory, onSendChat, onChangeProject }) {
+function ProjectDashboard({ project, jiraConfig, onSaveConfig, chatHistory, onSendChat, onChangeProject, chatLoading, configLoading }) {
   return (
     <div className="flex h-full">
       <Sidebar project={project} onChangeProject={onChangeProject} />
       <div className="flex flex-col flex-1 p-4 gap-4">
         <div className="flex flex-col md:flex-row gap-4 h-full">
-          <JiraSetupForm config={jiraConfig} onSave={onSaveConfig} />
-          <ChatPanel history={chatHistory} onSend={onSendChat} />
+          <JiraSetupForm config={jiraConfig} onSave={onSaveConfig} loading={configLoading} />
+          <ChatPanel history={chatHistory} onSend={onSendChat} loading={chatLoading} />
         </div>
       </div>
     </div>
@@ -95,56 +141,44 @@ function ProjectDashboard({ project, jiraConfig, onSaveConfig, chatHistory, onSe
 }
 
 function App() {
-  const [project, setProject] = useState(localStorage.getItem('currentProject'));
-  const [projects, setProjects] = useState(JSON.parse(localStorage.getItem('projects') || '[]'));
-  const [jiraConfig, setJiraConfig] = useState(JSON.parse(localStorage.getItem('jiraConfig') || '{}'));
+  const { project, projects, createProject, selectProject, resetProject, jiraConfig, saveConfig, configLoading } = useContext(AppContext);
   const [chatHistory, setChatHistory] = useState([]);
+  const [chatLoading, setChatLoading] = useState(false);
 
-  const saveProjects = (list) => localStorage.setItem('projects', JSON.stringify(list));
-
-  const handleCreateProject = () => {
+  const handleCreateProject = async () => {
     const name = prompt('Enter new project name');
-    if (name) {
-      const newProjects = [...projects, name];
-      setProjects(newProjects);
-      saveProjects(newProjects);
-      setProject(name);
-      localStorage.setItem('currentProject', name);
-    }
+    if (name) await createProject(name);
   };
 
-  const handleSelectProject = () => {
+  const handleSelectProject = async () => {
     if (projects.length === 0) {
       alert('No projects saved');
       return;
     }
     const name = prompt('Select project: ' + projects.join(', '));
-    if (name && projects.includes(name)) {
-      setProject(name);
-      localStorage.setItem('currentProject', name);
-    }
+    if (name && projects.includes(name)) await selectProject(name);
   };
 
   const handleChangeProject = () => {
-    setProject(null);
-    localStorage.removeItem('currentProject');
+    resetProject();
   };
 
-  const handleSaveConfig = (conf) => {
-    setJiraConfig(conf);
-    localStorage.setItem('jiraConfig', JSON.stringify(conf));
+  const handleSaveConfig = async (conf) => {
+    await saveConfig(conf);
   };
 
   const handleSendChat = async (text) => {
     const newHistory = [...chatHistory, { sender: 'user', text }];
     setChatHistory(newHistory);
+    setChatLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/sidekick', { notes: text, project });
-      const aiText = res.data.result ? JSON.stringify(res.data.result) : JSON.stringify(res.data);
+      const res = await axios.post(`${API_BASE}/run-notes`, { notes: text, project });
+      const aiText = res.data.response || res.data.result || JSON.stringify(res.data);
       setChatHistory([...newHistory, { sender: 'ai', text: aiText }]);
     } catch (err) {
       setChatHistory([...newHistory, { sender: 'ai', text: 'Error contacting backend' }]);
     }
+    setChatLoading(false);
   };
 
   if (!project) {
@@ -159,11 +193,13 @@ function App() {
       chatHistory={chatHistory}
       onSendChat={handleSendChat}
       onChangeProject={handleChangeProject}
+      chatLoading={chatLoading}
+      configLoading={configLoading}
     />
   );
 }
 
-ReactDOM.render(<App />, document.getElementById('root'));
+ReactDOM.render(<AppProvider><App /></AppProvider>, document.getElementById('root'));
 </script>
 </body>
 </html>

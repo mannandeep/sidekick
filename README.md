@@ -71,6 +71,24 @@ POST `/sidekick` with `{ "notes": "..." }` to get a response.
 
 A minimal web interface is provided under `frontend/`.
 
+## Desktop Electron App
+
+A lightweight desktop UI lives in `desktop/`.
+To try it out:
+
+```bash
+cd desktop
+npm install
+npm start
+```
+
+The Electron window connects to the backend at `http://localhost:5000` so make
+sure the API server is running first:
+
+```bash
+python -m backend serve
+```
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
