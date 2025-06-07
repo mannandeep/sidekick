@@ -69,15 +69,25 @@ def build_full_snapshot():
     return snapshot
 
 
-def save_snapshot(snapshot, filename: str | None = None):
-    if filename is None:
-        filename = Path(__file__).parent.parent / "jira_memory.json"
-    else:
-        filename = Path(filename)
+DEFAULT_SNAPSHOT_PATH = Path(__file__).parent.parent / "jira_memory.json"
 
-    with open(filename, "w") as f:
+
+def save_snapshot(snapshot, filename: str | None = None):
+    """Write the given snapshot to disk.
+
+    Parameters
+    ----------
+    snapshot : dict
+        The Jira data snapshot to persist.
+    filename : str, optional
+        Path to the file where the snapshot should be written. Defaults to
+        ``jira_memory.json`` in the project root.
+    """
+
+    target = Path(filename) if filename else DEFAULT_SNAPSHOT_PATH
+    with open(target, "w") as f:
         json.dump(snapshot, f, indent=2)
-    print(f"✅ Jira snapshot saved to {filename}")
+    print(f"✅ Jira snapshot saved to {target}")
 
 if __name__ == "__main__":
     print("📡 Building full Jira memory snapshot...")
