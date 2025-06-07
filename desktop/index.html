@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Sidekick Desktop</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="h-screen">
+  <div id="root" class="h-full"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+function WelcomeScreen({ onCreate, onSelect }) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full bg-gray-100">
+      <h1 className="text-4xl font-bold mb-8">Welcome to Sidekick</h1>
+      <div className="space-x-4">
+        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onSelect}>Select Existing Project</button>
+        <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={onCreate}>Create New Project</button>
+      </div>
+    </div>
+  );
+}
+
+function Sidebar({ project, onChangeProject }) {
+  return (
+    <div className="w-64 bg-gray-800 text-white p-4 flex flex-col">
+      <div className="text-xl font-semibold mb-4">Project: {project}</div>
+      <button className="mb-2 px-2 py-1 bg-gray-700 rounded" onClick={onChangeProject}>Change Project</button>
+      <button className="px-2 py-1 bg-gray-700 rounded">Settings</button>
+    </div>
+  );
+}
+
+function JiraSetupForm({ config, onSave }) {
+  const [form, setForm] = useState(config);
+  useEffect(() => setForm(config), [config]);
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleSubmit = () => {
+    onSave(form);
+  };
+  return (
+    <div className="border rounded p-4 flex flex-col w-full md:w-1/3">
+      <h2 className="text-xl mb-2">🛠 Jira Setup</h2>
+      <input className="border p-1 mb-2" placeholder="Jira domain" name="domain" value={form.domain || ''} onChange={handleChange} />
+      <input className="border p-1 mb-2" placeholder="API token" name="token" value={form.token || ''} onChange={handleChange} />
+      <input className="border p-1 mb-2" placeholder="Email" name="email" value={form.email || ''} onChange={handleChange} />
+      <input className="border p-1 mb-2" placeholder="Project key" name="projectKey" value={form.projectKey || ''} onChange={handleChange} />
+      <input className="border p-1 mb-2" placeholder="Default assignee" name="assignee" value={form.assignee || ''} onChange={handleChange} />
+      <button className="bg-blue-500 text-white px-2 py-1 rounded mt-auto" onClick={handleSubmit}>Save Config</button>
+    </div>
+  );
+}
+
+function ChatPanel({ history, onSend }) {
+  const [input, setInput] = useState('');
+  const send = () => {
+    if (!input.trim()) return;
+    onSend(input);
+    setInput('');
+  };
+  return (
+    <div className="flex flex-col flex-1 border rounded p-4">
+      <h2 className="text-xl mb-2">💬 Chat</h2>
+      <div className="flex-1 overflow-y-auto mb-2 space-y-2">
+        {history.map((msg, i) => (
+          <div key={i} className={`p-2 rounded ${msg.sender === 'user' ? 'bg-blue-100 text-right' : 'bg-gray-100'}`}>{msg.text}</div>
+        ))}
+      </div>
+      <div className="flex">
+        <input className="flex-1 border p-2 rounded-l" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if(e.key === 'Enter'){e.preventDefault(); send(); } }} placeholder="Ask something..." />
+        <button className="bg-blue-500 text-white px-4 rounded-r" onClick={send}>Send</button>
+      </div>
+    </div>
+  );
+}
+
+function ProjectDashboard({ project, jiraConfig, onSaveConfig, chatHistory, onSendChat, onChangeProject }) {
+  return (
+    <div className="flex h-full">
+      <Sidebar project={project} onChangeProject={onChangeProject} />
+      <div className="flex flex-col flex-1 p-4 gap-4">
+        <div className="flex flex-col md:flex-row gap-4 h-full">
+          <JiraSetupForm config={jiraConfig} onSave={onSaveConfig} />
+          <ChatPanel history={chatHistory} onSend={onSendChat} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function App() {
+  const [project, setProject] = useState(localStorage.getItem('currentProject'));
+  const [projects, setProjects] = useState(JSON.parse(localStorage.getItem('projects') || '[]'));
+  const [jiraConfig, setJiraConfig] = useState(JSON.parse(localStorage.getItem('jiraConfig') || '{}'));
+  const [chatHistory, setChatHistory] = useState([]);
+
+  const saveProjects = (list) => localStorage.setItem('projects', JSON.stringify(list));
+
+  const handleCreateProject = () => {
+    const name = prompt('Enter new project name');
+    if (name) {
+      const newProjects = [...projects, name];
+      setProjects(newProjects);
+      saveProjects(newProjects);
+      setProject(name);
+      localStorage.setItem('currentProject', name);
+    }
+  };
+
+  const handleSelectProject = () => {
+    if (projects.length === 0) {
+      alert('No projects saved');
+      return;
+    }
+    const name = prompt('Select project: ' + projects.join(', '));
+    if (name && projects.includes(name)) {
+      setProject(name);
+      localStorage.setItem('currentProject', name);
+    }
+  };
+
+  const handleChangeProject = () => {
+    setProject(null);
+    localStorage.removeItem('currentProject');
+  };
+
+  const handleSaveConfig = (conf) => {
+    setJiraConfig(conf);
+    localStorage.setItem('jiraConfig', JSON.stringify(conf));
+  };
+
+  const handleSendChat = async (text) => {
+    const newHistory = [...chatHistory, { sender: 'user', text }];
+    setChatHistory(newHistory);
+    try {
+      const res = await axios.post('http://localhost:5000/sidekick', { notes: text, project });
+      const aiText = res.data.result ? JSON.stringify(res.data.result) : JSON.stringify(res.data);
+      setChatHistory([...newHistory, { sender: 'ai', text: aiText }]);
+    } catch (err) {
+      setChatHistory([...newHistory, { sender: 'ai', text: 'Error contacting backend' }]);
+    }
+  };
+
+  if (!project) {
+    return <WelcomeScreen onCreate={handleCreateProject} onSelect={handleSelectProject} />;
+  }
+
+  return (
+    <ProjectDashboard
+      project={project}
+      jiraConfig={jiraConfig}
+      onSaveConfig={handleSaveConfig}
+      chatHistory={chatHistory}
+      onSendChat={handleSendChat}
+      onChangeProject={handleChangeProject}
+    />
+  );
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+</script>
+</body>
+</html>
