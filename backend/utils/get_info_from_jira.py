@@ -3,13 +3,12 @@ import json
 import os
 from pathlib import Path
 import requests
-import os
-import requests
-import json
 
 from dotenv import load_dotenv
+from .config import require_env_vars
 
 load_dotenv()
+require_env_vars(["JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_DOMAIN"])
 
 JIRA_EMAIL = os.getenv("JIRA_EMAIL")
 JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
@@ -75,8 +74,6 @@ def save_snapshot(snapshot, filename: str | None = None):
         filename = Path(__file__).parent.parent / "jira_memory.json"
     else:
         filename = Path(filename)
-        
-def save_snapshot(snapshot, filename="jira_memory.json"):
 
     with open(filename, "w") as f:
         json.dump(snapshot, f, indent=2)
