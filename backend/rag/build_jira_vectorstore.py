@@ -2,8 +2,6 @@
 import json
 from pathlib import Path
 
-import os
-
 from dotenv import load_dotenv
 from langchain.schema import Document
 from langchain_community.vectorstores import FAISS
