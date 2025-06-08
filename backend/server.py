@@ -21,6 +21,14 @@ def set_project_route():
     set_context_field('active_project_key', key)
     return jsonify({'active_project_key': key})
 
+@app.route('/set-project', methods=['POST'])
+def set_project_dash_route():
+    project = request.get_json().get('project')
+    if not project:
+        return jsonify({'error': 'Missing project'}), 400
+    set_context_field('active_project_key', project)
+    return jsonify({'active_project_key': project})
+
 @app.route('/set_assignee', methods=['POST'])
 def set_assignee_route():
     assignee = request.get_json().get('assignee')
