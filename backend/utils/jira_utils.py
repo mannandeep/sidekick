@@ -1,14 +1,18 @@
 import os
 from dotenv import load_dotenv
 from jira import JIRA
-from .config import require_env_vars
+from .credentials import load_credentials
 
 load_dotenv()
-require_env_vars(["JIRA_URL", "JIRA_EMAIL", "JIRA_API_TOKEN"])
+creds = load_credentials()
+if not creds:
+    raise EnvironmentError(
+        "Jira credentials not provided. Set env vars or use /connect_jira endpoint."
+    )
 
-JIRA_URL = os.getenv("JIRA_URL")
-JIRA_EMAIL = os.getenv("JIRA_EMAIL")
-JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
+JIRA_URL = creds["url"]
+JIRA_EMAIL = creds["email"]
+JIRA_API_TOKEN = creds["api_token"]
 
 jira = JIRA(
     server=JIRA_URL,

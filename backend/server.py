@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 from .sidekick import sidekick_core
 from .context.context_memory import set_context_field
+from .utils.credentials import save_credentials
 
 app = Flask(__name__)
 CORS(app)
@@ -36,6 +37,17 @@ def set_assignee_route():
         return jsonify({'error': 'Missing assignee'}), 400
     set_context_field('default_assignee', assignee)
     return jsonify({'default_assignee': assignee})
+
+
+@app.route('/connect_jira', methods=['POST'])
+def connect_jira_route():
+    data = request.get_json()
+    required = ['url', 'email', 'api_token', 'domain']
+    if not all(data.get(k) for k in required):
+        return jsonify({'error': 'Missing Jira credentials'}), 400
+
+    save_credentials(data['url'], data['email'], data['api_token'], data['domain'])
+    return jsonify({'success': True})
 
 if __name__ == '__main__':
     app.run(debug=True)

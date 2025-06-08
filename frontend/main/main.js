@@ -5,7 +5,7 @@ async function sendMessage() {
   // Show loading
   responseDiv.innerHTML = "<div class='chat-bubble'>🤖 Thinking...</div>";
 
-  const response = await fetch("http://localhost:5000/parse_notes", {
+  const response = await fetch("http://localhost:5000/sidekick", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ notes: input })
@@ -21,6 +21,23 @@ async function sendMessage() {
   </div>
 `).join('');
 
+}
+
+async function connectJira() {
+  const url = prompt("Jira URL (e.g. https://your.atlassian.net)");
+  const email = prompt("Email");
+  const token = prompt("API Token");
+  if (!url || !email || !token) {
+    alert("Missing information");
+    return;
+  }
+  const domain = url.replace(/^https?:\/\//, "");
+  await fetch("http://localhost:5000/connect_jira", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url, email, api_token: token, domain })
+  });
+  alert("Jira connected");
 }
 
 function formatResult(result) {

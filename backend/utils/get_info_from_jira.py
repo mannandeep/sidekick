@@ -5,14 +5,17 @@ from pathlib import Path
 import requests
 
 from dotenv import load_dotenv
-from .config import require_env_vars
-
+from .credentials import load_credentials
 load_dotenv()
-require_env_vars(["JIRA_EMAIL", "JIRA_API_TOKEN", "JIRA_DOMAIN"])
+creds = load_credentials()
+if not creds:
+    raise EnvironmentError(
+        "Jira credentials not provided. Set env vars or use /connect_jira endpoint."
+    )
 
-JIRA_EMAIL = os.getenv("JIRA_EMAIL")
-JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
-JIRA_DOMAIN = os.getenv("JIRA_DOMAIN")
+JIRA_EMAIL = creds["email"]
+JIRA_API_TOKEN = creds["api_token"]
+JIRA_DOMAIN = creds["domain"]
 JIRA_HEADERS = { "Accept": "application/json" }
 JIRA_AUTH = (JIRA_EMAIL, JIRA_API_TOKEN)
 
