@@ -29,7 +29,7 @@ function AppProvider({ children }) {
   const selectProject = async (name) => {
     setProjectState(name);
     localStorage.setItem('currentProject', name);
-    try { await axios.post(`${API_BASE}/set_project`, { key: name }); } catch (e) { console.error(e); }
+    try { await axios.post(`${API_BASE}/set-project`, { project: name }); } catch (e) { console.error(e); }
   };
 
   const createProject = async (name) => {
@@ -60,12 +60,22 @@ function AppProvider({ children }) {
 }
 
 function WelcomeScreen({ onCreate, onSelect }) {
+  const [projectName, setProjectName] = useState('');
+  const handleCreate = () => {
+    if (projectName.trim()) onCreate(projectName.trim());
+  };
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-100">
-      <h1 className="text-4xl font-bold mb-8">Welcome to Sidekick</h1>
+      <h1 className="text-4xl font-bold mb-4">Welcome to Sidekick</h1>
+      <input
+        className="border p-2 rounded mb-4 w-64"
+        placeholder="Project name"
+        value={projectName}
+        onChange={e => setProjectName(e.target.value)}
+      />
       <div className="space-x-4">
         <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onSelect}>Select Existing Project</button>
-        <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={onCreate}>Create New Project</button>
+        <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleCreate}>Create New Project</button>
       </div>
     </div>
   );
@@ -145,8 +155,7 @@ function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
 
-  const handleCreateProject = async () => {
-    const name = prompt('Enter new project name');
+  const handleCreateProject = async (name) => {
     if (name) await createProject(name);
   };
 
