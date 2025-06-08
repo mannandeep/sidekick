@@ -29,7 +29,7 @@ function AppProvider({ children }) {
   const selectProject = async (name) => {
     setProjectState(name);
     localStorage.setItem('currentProject', name);
-    try { await axios.post(`${API_BASE}/set-project`, { project: name }); } catch (e) { console.error(e); }
+    try { await axios.post(`${API_BASE}/set_project`, { key: name }); } catch (e) { console.error(e); }
   };
 
   const createProject = async (name) => {
