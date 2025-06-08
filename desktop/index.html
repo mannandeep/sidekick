@@ -59,14 +59,53 @@ function AppProvider({ children }) {
   );
 }
 
-function WelcomeScreen({ onCreate, onSelect }) {
+function WelcomeScreen({ onCreate, onSelect, projects }) {
+  const [creating, setCreating] = useState(false);
+  const [selecting, setSelecting] = useState(false);
+  const [name, setName] = useState('');
+  const [selected, setSelected] = useState(projects[0] || '');
+
+  const handleCreate = () => {
+    const n = name.trim();
+    if (n) {
+      onCreate(n);
+      setName('');
+      setCreating(false);
+    }
+  };
+
+  const handleSelect = () => {
+    if (selected) {
+      onSelect(selected);
+      setSelecting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-full bg-gray-100">
       <h1 className="text-4xl font-bold mb-8">Welcome to Sidekick</h1>
-      <div className="space-x-4">
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onSelect}>Select Existing Project</button>
-        <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={onCreate}>Create New Project</button>
-      </div>
+      {!creating && !selecting && (
+        <div className="space-x-4">
+          <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => setSelecting(true)}>Select Existing Project</button>
+          <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={() => setCreating(true)}>Create New Project</button>
+        </div>
+      )}
+      {creating && (
+        <div className="space-x-2">
+          <input className="border p-1" placeholder="Project name" value={name} onChange={e => setName(e.target.value)} />
+          <button className="px-3 py-1 bg-green-500 text-white rounded" onClick={handleCreate}>Save</button>
+          <button className="px-3 py-1 bg-gray-300 rounded" onClick={() => { setCreating(false); setName(''); }}>Cancel</button>
+        </div>
+      )}
+      {selecting && (
+        <div className="space-x-2">
+          <select className="border p-1" value={selected} onChange={e => setSelected(e.target.value)}>
+            {projects.map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <button className="px-3 py-1 bg-blue-500 text-white rounded" onClick={handleSelect}>Select</button>
+          <button className="px-3 py-1 bg-gray-300 rounded" onClick={() => setSelecting(false)}>Cancel</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -145,18 +184,12 @@ function App() {
   const [chatHistory, setChatHistory] = useState([]);
   const [chatLoading, setChatLoading] = useState(false);
 
-  const handleCreateProject = async () => {
-    const name = prompt('Enter new project name');
+  const handleCreateProject = async (name) => {
     if (name) await createProject(name);
   };
 
-  const handleSelectProject = async () => {
-    if (projects.length === 0) {
-      alert('No projects saved');
-      return;
-    }
-    const name = prompt('Select project: ' + projects.join(', '));
-    if (name && projects.includes(name)) await selectProject(name);
+  const handleSelectProject = async (name) => {
+    if (name) await selectProject(name);
   };
 
   const handleChangeProject = () => {
@@ -182,7 +215,7 @@ function App() {
   };
 
   if (!project) {
-    return <WelcomeScreen onCreate={handleCreateProject} onSelect={handleSelectProject} />;
+    return <WelcomeScreen onCreate={handleCreateProject} onSelect={handleSelectProject} projects={projects} />;
   }
 
   return (
