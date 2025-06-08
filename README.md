@@ -28,7 +28,9 @@ Run the assistant via CLI or start the HTTP API.
 
 ### Environment
 
-Create a `.env` file with:
+You can either set Jira credentials in a `.env` file or connect at runtime.
+
+To use environment variables create `.env` with:
 
 ```
 JIRA_URL=<https://your-domain.atlassian.net>
@@ -36,6 +38,10 @@ JIRA_EMAIL=<your@email>
 JIRA_API_TOKEN=<token>
 JIRA_DOMAIN=<your-domain.atlassian.net>
 ```
+
+Alternatively call the `/connect_jira` endpoint (or the "Connect to Jira" button
+in the web UI) and provide your Jira URL, email and API token. Credentials are
+stored in `backend/jira_credentials.json`.
 
 ### Build Memory and Vector Store
 
@@ -70,6 +76,8 @@ POST `/sidekick` with `{ "notes": "..." }` to get a response.
 ## Frontend
 
 A minimal web interface is provided under `frontend/`.
+Use the **Connect to Jira** button in the UI to supply your credentials if you
+haven't created a `.env` file.
 
 ## Desktop Electron App
 
