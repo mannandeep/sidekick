@@ -59,23 +59,38 @@ function AppProvider({ children }) {
   );
 }
 
-function WelcomeScreen({ onCreate, onSelect }) {
+function WelcomeScreen({ projects, onCreate, onSelect }) {
   const [projectName, setProjectName] = useState('');
   const handleCreate = () => {
-    if (projectName.trim()) onCreate(projectName.trim());
+    const name = projectName.trim();
+    if (name) {
+      onCreate(name);
+      setProjectName('');
+    }
   };
   return (
-    <div className="flex flex-col items-center justify-center h-full bg-gray-100">
-      <h1 className="text-4xl font-bold mb-4">Welcome to Sidekick</h1>
-      <input
-        className="border p-2 rounded mb-4 w-64"
-        placeholder="Project name"
-        value={projectName}
-        onChange={e => setProjectName(e.target.value)}
-      />
-      <div className="space-x-4">
-        <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={onSelect}>Select Existing Project</button>
-        <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleCreate}>Create New Project</button>
+    <div className="flex h-full bg-green-50">
+      <div className="w-64 bg-green-200 p-4 space-y-2">
+        <h2 className="text-xl font-bold mb-2">Projects</h2>
+        <ul className="space-y-1">
+          {projects.map(p => (
+            <li key={p}>
+              <button className="w-full text-left px-2 py-1 rounded bg-green-300 hover:bg-green-400" onClick={() => onSelect(p)}>{p}</button>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex flex-col flex-1 items-center justify-center">
+        <h1 className="text-4xl font-bold mb-6 text-green-600">Welcome to Sidekick</h1>
+        <div className="flex gap-2">
+          <input
+            className="border p-2 rounded w-64"
+            placeholder="New project name"
+            value={projectName}
+            onChange={e => setProjectName(e.target.value)}
+          />
+          <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleCreate}>Create</button>
+        </div>
       </div>
     </div>
   );
@@ -159,13 +174,8 @@ function App() {
     if (name) await createProject(name);
   };
 
-  const handleSelectProject = async () => {
-    if (projects.length === 0) {
-      alert('No projects saved');
-      return;
-    }
-    const name = prompt('Select project: ' + projects.join(', '));
-    if (name && projects.includes(name)) await selectProject(name);
+  const handleSelectProject = async (name) => {
+    if (name) await selectProject(name);
   };
 
   const handleChangeProject = () => {
@@ -191,7 +201,7 @@ function App() {
   };
 
   if (!project) {
-    return <WelcomeScreen onCreate={handleCreateProject} onSelect={handleSelectProject} />;
+    return <WelcomeScreen projects={projects} onCreate={handleCreateProject} onSelect={handleSelectProject} />;
   }
 
   return (
