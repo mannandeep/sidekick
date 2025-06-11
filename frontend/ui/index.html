@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sidekick</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#f9f5f0] min-h-screen flex font-sans">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-white shadow-md px-6 py-6">
+    <h2 class="text-xl font-semibold text-black mb-6">Projects</h2>
+    <ul class="space-y-3">
+      <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAP</li>
+      <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAP</li>
+      <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAp</li>
+      <li class="bg-gray-100 text-black rounded-lg px-4 py-2 hover:bg-gray-200 transition">+ New Project</li>
+    </ul>
+  </aside>
+
+  <!-- Main -->
+  <main class="flex-1 flex items-center justify-center px-10">
+    <div class="text-center space-y-6">
+      <h1 class="text-4xl font-bold text-green-700">Welcome to Sidekick</h1>
+      <div class="flex justify-center items-center gap-3">
+        <input
+          type="text"
+          placeholder="New project name"
+          class="px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400 w-64"
+        />
+        <button class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+          Create
+        </button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
