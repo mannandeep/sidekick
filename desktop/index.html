@@ -59,6 +59,10 @@
       <button class="hover:underline text-left">Project Beta</button>
       <button class="hover:underline text-left">Project Gamma</button>
     </div>
+    <div id="new-project-form" class="hidden flex space-x-2 mt-2">
+      <input id="new-project-input" class="flex-1 px-2 py-1 rounded text-black" placeholder="Project name" />
+      <button id="create-project" class="bg-green-600 text-white px-2 py-1 rounded">Create</button>
+    </div>
   </section>
 
   <!-- Main Panel -->
@@ -93,14 +97,39 @@
       });
     });
 
+    const form = document.getElementById("new-project-form");
+    const input = document.getElementById("new-project-input");
+    const createBtn = document.getElementById("create-project");
+
+    const saved = JSON.parse(localStorage.getItem("projects") || "[]");
+    saved.forEach(name => {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.className = "hover:underline text-left";
+      projectList.appendChild(btn);
+    });
+
     addProject.addEventListener("click", () => {
-      const name = prompt("Enter project name:");
-      if (name) {
-        const btn = document.createElement("button");
-        btn.textContent = name;
-        btn.className = "hover:underline text-left";
-        projectList.appendChild(btn);
-      }
+      form.classList.toggle("hidden");
+      input.focus();
+    });
+
+    function createProject() {
+      const name = input.value.trim();
+      if (!name) return;
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.className = "hover:underline text-left";
+      projectList.appendChild(btn);
+      saved.push(name);
+      localStorage.setItem("projects", JSON.stringify(saved));
+      input.value = "";
+      form.classList.add("hidden");
+    }
+
+    createBtn.addEventListener("click", createProject);
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") createProject();
     });
 
     icons[0].click(); // default to Home

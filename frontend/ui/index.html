@@ -15,6 +15,10 @@
       <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAP</li>
       <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAp</li>
       <li id="add-project" class="bg-gray-100 text-black rounded-lg px-4 py-2 hover:bg-gray-200 transition cursor-pointer">+ New Project</li>
+      <li id="new-project-form" class="hidden flex items-center space-x-2">
+        <input id="new-project-input" type="text" class="flex-1 px-2 py-1 border rounded" placeholder="Project name" />
+        <button id="create-project" class="bg-green-600 text-white px-2 py-1 rounded">Create</button>
+      </li>
     </ul>
   </aside>
 
@@ -36,14 +40,40 @@
   </main>
   <script>
     const addProject = document.getElementById('add-project');
+    const form = document.getElementById('new-project-form');
+    const input = document.getElementById('new-project-input');
+    const createBtn = document.getElementById('create-project');
+
+    const projectList = addProject.parentNode;
+    const saved = JSON.parse(localStorage.getItem('projects') || '[]');
+    saved.forEach(name => {
+      const li = document.createElement('li');
+      li.textContent = name;
+      li.className = 'bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition';
+      projectList.insertBefore(li, addProject);
+    });
+
     addProject.addEventListener('click', () => {
-      const name = prompt('Enter project name:');
-      if (name) {
-        const li = document.createElement('li');
-        li.textContent = name;
-        li.className = 'bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition';
-        addProject.parentNode.insertBefore(li, addProject);
-      }
+      form.classList.toggle('hidden');
+      input.focus();
+    });
+
+    function createProject() {
+      const name = input.value.trim();
+      if (!name) return;
+      const li = document.createElement('li');
+      li.textContent = name;
+      li.className = 'bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition';
+      projectList.insertBefore(li, addProject);
+      saved.push(name);
+      localStorage.setItem('projects', JSON.stringify(saved));
+      input.value = '';
+      form.classList.add('hidden');
+    }
+
+    createBtn.addEventListener('click', createProject);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') createProject();
     });
   </script>
 </body>
