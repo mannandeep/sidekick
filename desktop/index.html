@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sidekick – Project View (Popup)</title>
+  <title>Sidekick Project Chat View</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -13,16 +14,27 @@
 </head>
 <body class="flex min-h-screen bg-[#F4E4C2]">
 
-  <!-- Left Sidebar -->
+  <!-- Sidebar -->
   <aside class="w-20 bg-[#348F6C] text-white flex flex-col items-center py-5 space-y-6">
-    <button class="icon-btn active-tab" data-id="Home">
-      🏠
-    </button>
-    <button class="icon-btn" data-id="Projects">📁</button>
-    <button class="icon-btn" data-id="Settings">⚙️</button>
+    <button class="icon-btn active-tab" data-id="Home" title="Home">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V20a1 1 0 01-1 1h-5v-5H9v5H4a1 1 0 01-1-1V9.75z"/>
+  </svg>
+</button>
+    <button class="icon-btn" data-id="Projects" title="Projects">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+  </svg>
+</button>
+    <button class="icon-btn" data-id="Settings" title="Settings">
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round"
+          d="M12 15.5A3.5 3.5 0 1115.5 12 3.504 3.504 0 0112 15.5zm7.92-1.91l1.56-2.7-1.91-3.3-2.7 1.56A6.962 6.962 0 0012 6.08V3h-3v3.08A6.962 6.962 0 006.13 9.15L3.42 7.59 1.5 10.89l1.56 2.7A6.962 6.962 0 006.08 12H3v3h3.08a6.962 6.962 0 001.56 2.7l-1.56 2.7 1.91 3.3 2.7-1.56A6.962 6.962 0 0012 21.92V25h3v-3.08a6.962 6.962 0 002.7-1.56l2.7 1.56 1.91-3.3-1.56-2.7A6.962 6.962 0 0018.92 13.59z"/>
+  </svg>
+</button>
   </aside>
 
-  <!-- Middle Panel -->
+  <!-- Project list -->
   <section id="project-list" class="w-64 bg-[#3C9F7A] text-white px-4 py-6 hidden flex-col space-y-4">
     <div class="flex justify-between items-center mb-2">
       <h2 class="text-xs uppercase text-[#F4E4C2] font-semibold">Projects</h2>
@@ -34,17 +46,42 @@
     </div>
   </section>
 
-  <!-- Main Panel -->
-  <main id="main-panel" class="flex-1 bg-white p-10 overflow-y-auto">
+  <!-- Main Content -->
+  <main id="main-panel" class="flex-1 bg-white px-16 py-10 overflow-y-auto">
     <div id="default-view" class="space-y-4">
       <h1 class="text-2xl font-semibold text-gray-800">Welcome</h1>
       <p class="text-gray-500">This is the blank state for now.</p>
     </div>
 
-    <div id="project-view" class="hidden space-y-8">
-      <h2 id="project-title" class="text-xl font-semibold text-[#348F6C]">Project Name</h2>
-      <div class="bg-gray-100 rounded-xl p-4 shadow-sm">
-        <input type="text" placeholder="New chat in this project..." class="w-full p-3 rounded-xl bg-white border border-gray-300 focus:outline-none focus:ring" />
+    <div id="project-view" class="hidden space-y-10">
+      <!-- Project Title -->
+      <div class="flex items-center gap-2 text-2xl font-medium text-gray-800">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        </svg>
+        <h2 id="project-title">Project Name</h2>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="rounded-2xl border border-gray-200 shadow-sm p-4 flex items-center gap-4 bg-white max-w-5xl">
+        <input type="text" id="chat-input" placeholder="New chat in this project..." class="flex-1 border-none focus:outline-none text-sm" />
+        <button id="send-chat" class="text-gray-500 hover:text-black">Send</button>
+      </div>
+
+      <!-- Tiles Section -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md">
+          <div class="font-medium mb-1">📎 Add files</div>
+          <p class="text-xs text-gray-500">Chats in this project can access file content</p>
+        </div>
+        <div class="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md">
+          <div class="font-medium mb-1">📝 Project Overview</div>
+          <p class="text-xs text-gray-500">Write goals, scope, or any key notes for this project</p>
+        </div>
+        <div class="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md">
+          <div class="font-medium mb-1">🔗 Connect to Jira</div>
+          <p class="text-xs text-gray-500">Link this to your team’s Jira board</p>
+        </div>
       </div>
     </div>
   </main>
@@ -74,6 +111,9 @@
       const defaultView = document.getElementById("default-view");
       const projectView = document.getElementById("project-view");
       const projectTitle = document.getElementById("project-title");
+
+      const chatInput = document.getElementById("chat-input");
+      const chatSend = document.getElementById("send-chat");
 
       icons.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -119,10 +159,18 @@
       });
 
       function showProject(name) {
-
+        defaultView.classList.add("hidden");
         projectView.classList.remove("hidden");
         projectTitle.textContent = name;
       }
+
+      chatSend.addEventListener("click", () => {
+        const msg = chatInput.value.trim();
+        if (msg) {
+          alert("Message sent: " + msg);
+          chatInput.value = "";
+        }
+      });
 
       icons[0].click(); // Default to Home
     });
