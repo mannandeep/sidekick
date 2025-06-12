@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sidekick – Project View</title>
+  <title>Sidekick – Project View (Popup)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: 'Inter', sans-serif; }
@@ -13,31 +13,20 @@
 </head>
 <body class="flex min-h-screen bg-[#F4E4C2]">
 
-  <!-- Leftmost Sidebar -->
+  <!-- Left Sidebar -->
   <aside class="w-20 bg-[#348F6C] text-white flex flex-col items-center py-5 space-y-6">
     <button class="icon-btn active-tab" data-id="Home">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V20a1 1 0 01-1 1h-5v-5H9v5H4a1 1 0 01-1-1V9.75z"/>
-      </svg>
+      🏠
     </button>
-    <button class="icon-btn" data-id="Projects">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-      </svg>
-    </button>
-    <button class="icon-btn" data-id="Settings">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 00.33 1.82..."/>
-      </svg>
-    </button>
+    <button class="icon-btn" data-id="Projects">📁</button>
+    <button class="icon-btn" data-id="Settings">⚙️</button>
   </aside>
 
-  <!-- Middle Project List -->
+  <!-- Middle Panel -->
   <section id="project-list" class="w-64 bg-[#3C9F7A] text-white px-4 py-6 hidden flex-col space-y-4">
     <div class="flex justify-between items-center mb-2">
       <h2 class="text-xs uppercase text-[#F4E4C2] font-semibold">Projects</h2>
-      <button id="add-project" class="text-[#F4E4C2] text-base hover:text-white">+</button>
+      <button id="open-modal" class="text-[#F4E4C2] text-base hover:text-white">+</button>
     </div>
     <div id="projects" class="flex flex-col space-y-2">
       <button class="hover:underline text-left project-item">Project Alpha</button>
@@ -53,88 +42,90 @@
     </div>
 
     <div id="project-view" class="hidden space-y-8">
-      <div class="flex items-center gap-2">
-        <svg class="w-6 h-6 text-[#348F6C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-        </svg>
-        <h2 id="project-title" class="text-xl font-semibold text-[#348F6C]">Project Name</h2>
-      </div>
-
+      <h2 id="project-title" class="text-xl font-semibold text-[#348F6C]">Project Name</h2>
       <div class="bg-gray-100 rounded-xl p-4 shadow-sm">
         <input type="text" placeholder="New chat in this project..." class="w-full p-3 rounded-xl bg-white border border-gray-300 focus:outline-none focus:ring" />
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
-        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
-          <div class="font-medium mb-1">📎 Add files</div>
-          <div class="text-xs text-gray-500">Attach docs or assets to this project</div>
-        </div>
-        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
-          <div class="font-medium mb-1">📝 Add project overview</div>
-          <div class="text-xs text-gray-500">Describe project goals and context</div>
-        </div>
-        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
-          <div class="font-medium mb-1">🔗 Connect to Jira</div>
-          <div class="text-xs text-gray-500">Enable ticket syncing for this project</div>
-        </div>
       </div>
     </div>
   </main>
 
-  <!-- JS -->
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
+    <div class="bg-white rounded-xl p-6 w-80 shadow-lg">
+      <h2 class="text-lg font-semibold text-gray-800 mb-2">New Project</h2>
+      <input type="text" id="modal-project-name" placeholder="Project Name" class="w-full p-2 border rounded mb-4">
+      <div class="flex justify-end space-x-2">
+        <button id="cancel-modal" class="text-gray-500 hover:underline">Cancel</button>
+        <button id="create-modal-project" class="bg-[#348F6C] text-white px-3 py-1 rounded hover:bg-[#2b7456]">Create</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const icons = document.querySelectorAll(".icon-btn");
-    const projectPanel = document.getElementById("project-list");
-    const addProject = document.getElementById("add-project");
-    const projectList = document.getElementById("projects");
-    const defaultView = document.getElementById("default-view");
-    const projectView = document.getElementById("project-view");
-    const projectTitle = document.getElementById("project-title");
+    document.addEventListener("DOMContentLoaded", () => {
+      const icons = document.querySelectorAll(".icon-btn");
+      const projectPanel = document.getElementById("project-list");
+      const openModal = document.getElementById("open-modal");
+      const modal = document.getElementById("modal");
+      const modalInput = document.getElementById("modal-project-name");
+      const cancelModal = document.getElementById("cancel-modal");
+      const createModalBtn = document.getElementById("create-modal-project");
+      const projectList = document.getElementById("projects");
+      const defaultView = document.getElementById("default-view");
+      const projectView = document.getElementById("project-view");
+      const projectTitle = document.getElementById("project-title");
 
-    icons.forEach(btn => {
-      btn.addEventListener("click", () => {
-        icons.forEach(i => i.classList.remove("active-tab"));
-        btn.classList.add("active-tab");
+      icons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          icons.forEach(i => i.classList.remove("active-tab"));
+          btn.classList.add("active-tab");
 
-        const selected = btn.getAttribute("data-id");
-        if (selected === "Projects") {
-          projectPanel.classList.remove("hidden");
-        } else {
-          projectPanel.classList.add("hidden");
-          defaultView.classList.remove("hidden");
+          const selected = btn.getAttribute("data-id");
+          projectPanel.classList.toggle("hidden", selected !== "Projects");
+          defaultView.classList.toggle("hidden", selected === "Projects");
           projectView.classList.add("hidden");
+        });
+      });
+
+      openModal.addEventListener("click", () => {
+        modal.classList.remove("hidden");
+        modalInput.value = "";
+        modalInput.focus();
+      });
+
+      cancelModal.addEventListener("click", () => {
+        modal.classList.add("hidden");
+      });
+
+      createModalBtn.addEventListener("click", () => {
+        const name = modalInput.value.trim();
+        if (name) {
+          const btn = document.createElement("button");
+          btn.textContent = name;
+          btn.className = "hover:underline text-left project-item";
+          btn.addEventListener("click", () => {
+            showProject(name);
+          });
+          projectList.appendChild(btn);
+          modal.classList.add("hidden");
+          showProject(name);
         }
       });
-    });
 
-    addProject.addEventListener("click", () => {
-      const name = prompt("Enter new project name:");
-      if (name) {
-        const btn = document.createElement("button");
-        btn.textContent = name;
-        btn.className = "hover:underline text-left project-item";
-        projectList.appendChild(btn);
+      document.querySelectorAll(".project-item").forEach(btn => {
         btn.addEventListener("click", () => {
-          showProject(name);
+          showProject(btn.textContent);
         });
-        showProject(name);
-      }
-    });
-
-    document.querySelectorAll(".project-item").forEach(btn => {
-      btn.addEventListener("click", () => {
-        showProject(btn.textContent);
       });
+
+      function showProject(name) {
+
+        projectView.classList.remove("hidden");
+        projectTitle.textContent = name;
+      }
+
+      icons[0].click(); // Default to Home
     });
-
-    function showProject(name) {
-      defaultView.classList.add("hidden");
-      projectView.classList.remove("hidden");
-      projectTitle.textContent = name;
-    }
-
-    icons[0].click(); // Default Home
   </script>
 </body>
 </html>
