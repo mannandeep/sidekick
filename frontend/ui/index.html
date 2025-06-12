@@ -14,7 +14,7 @@
       <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAP</li>
       <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAP</li>
       <li class="bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition">AAp</li>
-      <li class="bg-gray-100 text-black rounded-lg px-4 py-2 hover:bg-gray-200 transition">+ New Project</li>
+      <li id="add-project" class="bg-gray-100 text-black rounded-lg px-4 py-2 hover:bg-gray-200 transition cursor-pointer">+ New Project</li>
     </ul>
   </aside>
 
@@ -34,5 +34,17 @@
       </div>
     </div>
   </main>
+  <script>
+    const addProject = document.getElementById('add-project');
+    addProject.addEventListener('click', () => {
+      const name = prompt('Enter project name:');
+      if (name) {
+        const li = document.createElement('li');
+        li.textContent = name;
+        li.className = 'bg-black text-white rounded-lg px-4 py-2 hover:bg-gray-800 transition';
+        addProject.parentNode.insertBefore(li, addProject);
+      }
+    });
+  </script>
 </body>
 </html>
