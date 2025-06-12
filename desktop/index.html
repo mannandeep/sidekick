@@ -2,23 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sidekick - Project Create</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sidekick – Project View</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    .active-tab {
-      background-color: #44A380 !important;
-      color: #FFFFFF !important;
-    }
-    .active-tab svg {
-      color: #FFFFFF !important;
-    }
+    body { font-family: 'Inter', sans-serif; }
+    .active-tab { background-color: #44A380 !important; color: #FFFFFF !important; }
+    .active-tab svg { color: #FFFFFF !important; }
   </style>
 </head>
-<body class="flex min-h-screen bg-[#F4E4C2] text-sm">
+<body class="flex min-h-screen bg-[#F4E4C2]">
 
   <!-- Leftmost Sidebar -->
   <aside class="w-20 bg-[#348F6C] text-white flex flex-col items-center py-5 space-y-6">
@@ -33,39 +26,59 @@
       </svg>
     </button>
     <button class="icon-btn" data-id="Settings">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
         <circle cx="12" cy="12" r="3" />
-        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65
-          1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65
-          1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65
-          1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65
-          1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65
-          1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65
-          1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65
-          1.65 0 00-.33 1.82V9c0 .66.42 1.25 1.04 1.47.63.22 1.36.12
-          1.88-.28l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-1.51 1z"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82..."/>
       </svg>
     </button>
   </aside>
 
-  <!-- Middle Panel -->
+  <!-- Middle Project List -->
   <section id="project-list" class="w-64 bg-[#3C9F7A] text-white px-4 py-6 hidden flex-col space-y-4">
     <div class="flex justify-between items-center mb-2">
-      <h2 class="text-xs uppercase text-[#F4E4C2] font-semibold tracking-wide">Projects</h2>
+      <h2 class="text-xs uppercase text-[#F4E4C2] font-semibold">Projects</h2>
       <button id="add-project" class="text-[#F4E4C2] text-base hover:text-white">+</button>
     </div>
     <div id="projects" class="flex flex-col space-y-2">
-      <button class="hover:underline text-left">Project Alpha</button>
-      <button class="hover:underline text-left">Project Beta</button>
-      <button class="hover:underline text-left">Project Gamma</button>
+      <button class="hover:underline text-left project-item">Project Alpha</button>
+      <button class="hover:underline text-left project-item">Project Beta</button>
     </div>
   </section>
 
   <!-- Main Panel -->
-  <main class="flex-1 bg-white px-10 py-14 transition-all duration-300">
-    <div id="main-panel" class="max-w-4xl mx-auto space-y-4">
-      <h1 class="text-2xl font-semibold text-gray-800" id="page-title">Welcome</h1>
-      <p class="text-gray-500">This is the blank state for now. We'll fill it in later.</p>
+  <main id="main-panel" class="flex-1 bg-white p-10 overflow-y-auto">
+    <div id="default-view" class="space-y-4">
+      <h1 class="text-2xl font-semibold text-gray-800">Welcome</h1>
+      <p class="text-gray-500">This is the blank state for now.</p>
+    </div>
+
+    <div id="project-view" class="hidden space-y-8">
+      <div class="flex items-center gap-2">
+        <svg class="w-6 h-6 text-[#348F6C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+        </svg>
+        <h2 id="project-title" class="text-xl font-semibold text-[#348F6C]">Project Name</h2>
+      </div>
+
+      <div class="bg-gray-100 rounded-xl p-4 shadow-sm">
+        <input type="text" placeholder="New chat in this project..." class="w-full p-3 rounded-xl bg-white border border-gray-300 focus:outline-none focus:ring" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700">
+        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
+          <div class="font-medium mb-1">📎 Add files</div>
+          <div class="text-xs text-gray-500">Attach docs or assets to this project</div>
+        </div>
+        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
+          <div class="font-medium mb-1">📝 Add project overview</div>
+          <div class="text-xs text-gray-500">Describe project goals and context</div>
+        </div>
+        <div class="border rounded-lg p-4 bg-white shadow-sm hover:shadow-md cursor-pointer text-center">
+          <div class="font-medium mb-1">🔗 Connect to Jira</div>
+          <div class="text-xs text-gray-500">Enable ticket syncing for this project</div>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -73,9 +86,11 @@
   <script>
     const icons = document.querySelectorAll(".icon-btn");
     const projectPanel = document.getElementById("project-list");
-    const pageTitle = document.getElementById("page-title");
     const addProject = document.getElementById("add-project");
     const projectList = document.getElementById("projects");
+    const defaultView = document.getElementById("default-view");
+    const projectView = document.getElementById("project-view");
+    const projectTitle = document.getElementById("project-title");
 
     icons.forEach(btn => {
       btn.addEventListener("click", () => {
@@ -83,27 +98,43 @@
         btn.classList.add("active-tab");
 
         const selected = btn.getAttribute("data-id");
-        pageTitle.textContent = selected;
-
         if (selected === "Projects") {
           projectPanel.classList.remove("hidden");
         } else {
           projectPanel.classList.add("hidden");
+          defaultView.classList.remove("hidden");
+          projectView.classList.add("hidden");
         }
       });
     });
 
     addProject.addEventListener("click", () => {
-      const name = prompt("Enter project name:");
+      const name = prompt("Enter new project name:");
       if (name) {
         const btn = document.createElement("button");
         btn.textContent = name;
-        btn.className = "hover:underline text-left";
+        btn.className = "hover:underline text-left project-item";
         projectList.appendChild(btn);
+        btn.addEventListener("click", () => {
+          showProject(name);
+        });
+        showProject(name);
       }
     });
 
-    icons[0].click(); // default to Home
+    document.querySelectorAll(".project-item").forEach(btn => {
+      btn.addEventListener("click", () => {
+        showProject(btn.textContent);
+      });
+    });
+
+    function showProject(name) {
+      defaultView.classList.add("hidden");
+      projectView.classList.remove("hidden");
+      projectTitle.textContent = name;
+    }
+
+    icons[0].click(); // Default Home
   </script>
 </body>
 </html>
