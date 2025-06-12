@@ -1,224 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Sidekick Desktop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sidekick - Project Create</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-  <script crossorigin src="https://unpkg.com/axios/dist/axios.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .active-tab {
+      background-color: #44A380 !important;
+      color: #FFFFFF !important;
+    }
+    .active-tab svg {
+      color: #FFFFFF !important;
+    }
+  </style>
 </head>
-<body class="h-screen">
-  <div id="root" class="h-full"></div>
+<body class="flex min-h-screen bg-[#F4E4C2] text-sm">
 
-<script type="text/babel">
-const { useState, useEffect, useContext, createContext } = React;
-const API_BASE = 'http://localhost:5000';
+  <!-- Leftmost Sidebar -->
+  <aside class="w-20 bg-[#348F6C] text-white flex flex-col items-center py-5 space-y-6">
+    <button class="icon-btn active-tab" data-id="Home">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 9.75L12 3l9 6.75V20a1 1 0 01-1 1h-5v-5H9v5H4a1 1 0 01-1-1V9.75z"/>
+      </svg>
+    </button>
+    <button class="icon-btn" data-id="Projects">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+      </svg>
+    </button>
+    <button class="icon-btn" data-id="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65
+          1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65
+          1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65
+          1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65
+          1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65
+          1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65
+          1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65
+          1.65 0 00-.33 1.82V9c0 .66.42 1.25 1.04 1.47.63.22 1.36.12
+          1.88-.28l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+    </button>
+  </aside>
 
-const AppContext = createContext();
-
-function AppProvider({ children }) {
-  const [project, setProjectState] = useState(localStorage.getItem('currentProject'));
-  const [projects, setProjects] = useState(JSON.parse(localStorage.getItem('projects') || '[]'));
-  const [jiraConfig, setJiraConfigState] = useState(JSON.parse(localStorage.getItem('jiraConfig') || '{}'));
-  const [configLoading, setConfigLoading] = useState(false);
-
-  const saveProjects = (list) => localStorage.setItem('projects', JSON.stringify(list));
-
-  const selectProject = async (name) => {
-    setProjectState(name);
-    localStorage.setItem('currentProject', name);
-    try { await axios.post(`${API_BASE}/set-project`, { project: name }); } catch (e) { console.error(e); }
-  };
-
-  const createProject = async (name) => {
-    const newProjects = [...projects, name];
-    setProjects(newProjects);
-    saveProjects(newProjects);
-    await selectProject(name);
-  };
-
-  const resetProject = () => {
-    setProjectState(null);
-    localStorage.removeItem('currentProject');
-  };
-
-  const saveConfig = async (conf) => {
-    setConfigLoading(true);
-    setJiraConfigState(conf);
-    localStorage.setItem('jiraConfig', JSON.stringify(conf));
-    try { await axios.post(`${API_BASE}/set-jira-config`, conf); } catch (e) { console.error(e); }
-    setConfigLoading(false);
-  };
-
-  return (
-    <AppContext.Provider value={{ project, projects, createProject, selectProject, resetProject, jiraConfig, saveConfig, configLoading }}>
-      {children}
-    </AppContext.Provider>
-  );
-}
-
-function WelcomeScreen({ projects, onCreate, onSelect }) {
-  const [projectName, setProjectName] = useState('');
-  const handleCreate = () => {
-    const name = projectName.trim();
-    if (name) {
-      onCreate(name);
-      setProjectName('');
-    }
-  };
-  return (
-    <div className="flex h-full bg-green-50">
-      <div className="w-64 bg-green-200 p-4 space-y-2">
-        <h2 className="text-xl font-bold mb-2">Projects</h2>
-        <ul className="space-y-1">
-          {projects.map(p => (
-            <li key={p}>
-              <button className="w-full text-left px-2 py-1 rounded bg-green-300 hover:bg-green-400" onClick={() => onSelect(p)}>{p}</button>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="flex flex-col flex-1 items-center justify-center">
-        <h1 className="text-4xl font-bold mb-6 text-green-600">Welcome to Sidekick</h1>
-        <div className="flex gap-2">
-          <input
-            className="border p-2 rounded w-64"
-            placeholder="New project name"
-            value={projectName}
-            onChange={e => setProjectName(e.target.value)}
-          />
-          <button className="px-4 py-2 bg-green-500 text-white rounded" onClick={handleCreate}>Create</button>
-        </div>
-      </div>
+  <!-- Middle Panel -->
+  <section id="project-list" class="w-64 bg-[#3C9F7A] text-white px-4 py-6 hidden flex-col space-y-4">
+    <div class="flex justify-between items-center mb-2">
+      <h2 class="text-xs uppercase text-[#F4E4C2] font-semibold tracking-wide">Projects</h2>
+      <button id="add-project" class="text-[#F4E4C2] text-base hover:text-white">+</button>
     </div>
-  );
-}
-
-function Sidebar({ project, onChangeProject }) {
-  return (
-    <div className="w-64 bg-gray-800 text-white p-4 flex flex-col">
-      <div className="text-xl font-semibold mb-4">Project: {project}</div>
-      <button className="mb-2 px-2 py-1 bg-gray-700 rounded" onClick={onChangeProject}>Change Project</button>
-      <button className="px-2 py-1 bg-gray-700 rounded">Settings</button>
+    <div id="projects" class="flex flex-col space-y-2">
+      <button class="hover:underline text-left">Project Alpha</button>
+      <button class="hover:underline text-left">Project Beta</button>
+      <button class="hover:underline text-left">Project Gamma</button>
     </div>
-  );
-}
+  </section>
 
-function JiraSetupForm({ config, onSave, loading }) {
-  const [form, setForm] = useState(config);
-  useEffect(() => setForm(config), [config]);
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const handleSubmit = () => {
-    onSave(form);
-  };
-  return (
-    <div className="border rounded p-4 flex flex-col w-full md:w-1/3">
-      <h2 className="text-xl mb-2">🛠 Jira Setup</h2>
-      <input className="border p-1 mb-2" placeholder="Jira domain" name="domain" value={form.domain || ''} onChange={handleChange} />
-      <input className="border p-1 mb-2" placeholder="API token" name="token" value={form.token || ''} onChange={handleChange} />
-      <input className="border p-1 mb-2" placeholder="Email" name="email" value={form.email || ''} onChange={handleChange} />
-      <input className="border p-1 mb-2" placeholder="Project key" name="projectKey" value={form.projectKey || ''} onChange={handleChange} />
-      <input className="border p-1 mb-2" placeholder="Default assignee" name="assignee" value={form.assignee || ''} onChange={handleChange} />
-      <button className="bg-blue-500 text-white px-2 py-1 rounded mt-auto" onClick={handleSubmit} disabled={loading}>
-        {loading ? 'Saving...' : 'Save Config'}
-      </button>
+  <!-- Main Panel -->
+  <main class="flex-1 bg-white px-10 py-14 transition-all duration-300">
+    <div id="main-panel" class="max-w-4xl mx-auto space-y-4">
+      <h1 class="text-2xl font-semibold text-gray-800" id="page-title">Welcome</h1>
+      <p class="text-gray-500">This is the blank state for now. We'll fill it in later.</p>
     </div>
-  );
-}
+  </main>
 
-function ChatPanel({ history, onSend, loading }) {
-  const [input, setInput] = useState('');
-  const send = () => {
-    if (!input.trim()) return;
-    onSend(input);
-    setInput('');
-  };
-  return (
-    <div className="flex flex-col flex-1 border rounded p-4">
-      <h2 className="text-xl mb-2">💬 Chat</h2>
-      <div className="flex-1 overflow-y-auto mb-2 space-y-2">
-        {history.map((msg, i) => (
-          <div key={i} className={`p-2 rounded ${msg.sender === 'user' ? 'bg-blue-100 text-right' : 'bg-gray-100'}`}>{msg.text}</div>
-        ))}
-      </div>
-      <div className="flex">
-        <input className="flex-1 border p-2 rounded-l" value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if(e.key === 'Enter'){e.preventDefault(); send(); } }} placeholder="Ask something..." />
-        <button className="bg-blue-500 text-white px-4 rounded-r" onClick={send} disabled={loading}>{loading ? '...': 'Send'}</button>
-      </div>
-    </div>
-  );
-}
+  <!-- JS -->
+  <script>
+    const icons = document.querySelectorAll(".icon-btn");
+    const projectPanel = document.getElementById("project-list");
+    const pageTitle = document.getElementById("page-title");
+    const addProject = document.getElementById("add-project");
+    const projectList = document.getElementById("projects");
 
-function ProjectDashboard({ project, jiraConfig, onSaveConfig, chatHistory, onSendChat, onChangeProject, chatLoading, configLoading }) {
-  return (
-    <div className="flex h-full">
-      <Sidebar project={project} onChangeProject={onChangeProject} />
-      <div className="flex flex-col flex-1 p-4 gap-4">
-        <div className="flex flex-col md:flex-row gap-4 h-full">
-          <JiraSetupForm config={jiraConfig} onSave={onSaveConfig} loading={configLoading} />
-          <ChatPanel history={chatHistory} onSend={onSendChat} loading={chatLoading} />
-        </div>
-      </div>
-    </div>
-  );
-}
+    icons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        icons.forEach(i => i.classList.remove("active-tab"));
+        btn.classList.add("active-tab");
 
-function App() {
-  const { project, projects, createProject, selectProject, resetProject, jiraConfig, saveConfig, configLoading } = useContext(AppContext);
-  const [chatHistory, setChatHistory] = useState([]);
-  const [chatLoading, setChatLoading] = useState(false);
+        const selected = btn.getAttribute("data-id");
+        pageTitle.textContent = selected;
 
-  const handleCreateProject = async (name) => {
-    if (name) await createProject(name);
-  };
+        if (selected === "Projects") {
+          projectPanel.classList.remove("hidden");
+        } else {
+          projectPanel.classList.add("hidden");
+        }
+      });
+    });
 
-  const handleSelectProject = async (name) => {
-    if (name) await selectProject(name);
-  };
+    addProject.addEventListener("click", () => {
+      const name = prompt("Enter project name:");
+      if (name) {
+        const btn = document.createElement("button");
+        btn.textContent = name;
+        btn.className = "hover:underline text-left";
+        projectList.appendChild(btn);
+      }
+    });
 
-  const handleChangeProject = () => {
-    resetProject();
-  };
-
-  const handleSaveConfig = async (conf) => {
-    await saveConfig(conf);
-  };
-
-  const handleSendChat = async (text) => {
-    const newHistory = [...chatHistory, { sender: 'user', text }];
-    setChatHistory(newHistory);
-    setChatLoading(true);
-    try {
-      const res = await axios.post(`${API_BASE}/run-notes`, { notes: text, project });
-      const aiText = res.data.response || res.data.result || JSON.stringify(res.data);
-      setChatHistory([...newHistory, { sender: 'ai', text: aiText }]);
-    } catch (err) {
-      setChatHistory([...newHistory, { sender: 'ai', text: 'Error contacting backend' }]);
-    }
-    setChatLoading(false);
-  };
-
-  if (!project) {
-    return <WelcomeScreen projects={projects} onCreate={handleCreateProject} onSelect={handleSelectProject} />;
-  }
-
-  return (
-    <ProjectDashboard
-      project={project}
-      jiraConfig={jiraConfig}
-      onSaveConfig={handleSaveConfig}
-      chatHistory={chatHistory}
-      onSendChat={handleSendChat}
-      onChangeProject={handleChangeProject}
-      chatLoading={chatLoading}
-      configLoading={configLoading}
-    />
-  );
-}
-
-ReactDOM.render(<AppProvider><App /></AppProvider>, document.getElementById('root'));
-</script>
+    icons[0].click(); // default to Home
+  </script>
 </body>
 </html>
